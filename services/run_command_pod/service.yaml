@@ -1,0 +1,45 @@
+cmd:
+  type: python-venv
+  command:
+    default: python -u run.py
+  path:
+    default: ~/.opereto/operetovenv
+item_properties:
+
+-   editor: json
+    key: pod_template
+    direction: input
+    mandatory: true
+    type: json
+    help: The command worker pod template
+    value: {
+        "kind": "Pod",
+        "spec": {
+          "restartPolicy": "OnFailure",
+          "containers": [
+          {
+            "image": "debian",
+            "args": [
+              "HOSTNAME",
+              "KUBERNETES_PORT"
+            ],
+            "command": [
+              "printenv"
+            ],
+            "name": "command-demo-container"
+          }
+          ]
+        },
+        "apiVersion": "v1",
+        "metadata": {
+          "labels": {
+            "purpose": "demonstrate-command"
+          },
+          "name": "command-demo"
+        }
+      }
+
+
+
+timeout: 1800
+type: action

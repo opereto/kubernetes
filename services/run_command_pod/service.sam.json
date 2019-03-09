@@ -1,0 +1,5 @@
+{
+   "elastic.worker": true,
+   "opereto.worker": true,
+   "mapping_indicator": "any"
+}

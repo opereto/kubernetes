@@ -1,0 +1,104 @@
+cmd:
+  type: python-venv
+  command:
+    default: python -u run.py
+  path:
+    default: ~/.opereto/operetovenv
+item_properties:
+
+-   editor: selectbox
+    key: pod_operation
+    direction: input
+    mandatory: true
+    type: text
+    store:
+        Create Worker Pod: create_pod
+        Delete Worker Pod: delete_pod
+    value: create_pod
+    help: Deployment operation to perform
+
+-   editor: text
+    key: pod_name
+    direction: input
+    mandatory: false
+    type: text
+    value:
+    help: Pod name, must start and end with small letter and contain only small letters and dash
+
+-   editor: json
+    key: pod_template
+    direction: input
+    mandatory: true
+    type: json
+    help: The worker pod template
+    value:  {
+        "apiVersion": "v1",
+        "kind": "Pod",
+        "metadata": {
+          "name": "<automatically assigned if not specified>"
+        },
+        "spec": {
+            "containers": [
+                {
+                    "image": "<add dockereto image name>",
+                    "name": "<automatically assigned if not specified>",
+                    "resources": {
+                        "requests": {
+                            "memory": "4Gi"
+                        },
+                        "limits": {
+                            "memory": "4Gi"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+
+-   editor: text
+    key: worker_config
+    direction: input
+    mandatory: true
+    type: text
+    value: worker-config
+    help: The worker secret configmap holding the Opereto access credential
+
+-   editor: text
+    key: agent_java_config
+    direction: input
+    mandatory: true
+    type: text
+    value: -Xms1000m -Xmx1000m
+    help: The worker agent JAVA config
+
+-   editor: text
+    key: agent_log_level
+    direction: input
+    mandatory: true
+    type: text
+    value: info
+    help: The worker agent log level (info. error, debug, warn, fatal)
+
+-   editor: json
+    key: agent_properties
+    direction: input
+    mandatory: false
+    type: json
+    value: {}
+    help: A map of custom key-value properties to assign to each worker agent, useful for service-agent mapping
+
+-   direction: input
+    editor: json
+    help: Services to run on the container agent post setup
+    example:
+    - service: run_shell_command
+      input:
+          command: apt-get update
+      title: updaring package sources after container is up
+    key: post_operations
+    mandatory: false
+    type: json
+    value: []
+
+timeout: 1800
+type: action

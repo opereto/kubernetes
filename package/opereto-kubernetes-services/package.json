@@ -1,0 +1,54 @@
+{
+    "id": "opereto-kubernetes-services",
+    "globals": [
+
+    ],
+    "services": {
+        "dockereto_worker_statefulset": {
+            "source_dir": "dockereto_worker_statefulset",
+            "info": {
+                "summary": "Manages docker+agent (e.g. dockereto) worker stateful sets used by Opereto as tools and operation processing endpoints"
+            }
+        },
+        "dockereto_worker_pod": {
+            "source_dir": "dockereto_worker_pod",
+            "info": {
+                "summary": "Manages docker+agent (e.g. dockereto) worker pods used by Opereto as operation tools and processing endpoints"
+            }
+        },
+        "run_command_pod": {
+            "source_dir": "run_command_pod",
+            "info": {
+                "summary": "Run command worker pods on-demand in Opereto elastic workers cluster"
+            }
+        }
+    },
+    "dependencies": {
+        "opereto_core_services": {
+            "version": ">=1.0.91"
+        }
+    },
+    "additional_info": {
+        "license": "Apache License 2.0",
+        "resources": [
+            {
+                "name": "Install Opereto elastic workers",
+                "url": "https://docs.opereto.com/installation-get-started/install_opereto_workers/"
+            },
+            {
+                "name": "Using Opereto workers",
+                "url": "https://docs.opereto.com/developing-with-opereto/opereto-workers/"
+            }
+        ]
+    },
+    "repository": {},
+    "name": "Opereto Kubernetes Services",
+    "summary": "Wrap automation and test tools as Kubernetes components and use them on-demands",
+    "description": "Kubernetes (k8s) is an open-source system for automating deployment, scaling, and management of containerized applications. Opereto kubernetes services allowing to setup, operate and teardown on-demand kubernetes-based worker pods and statefulsets. Workers can be packed as agent-embedded containers (dockereto) or as command containers executed by standard Opereto elastic workers.",
+    "version": "1.0.34",
+    "provider": "Opereto LTD",
+    "category": "Test & Automation Tools",
+    "provider_url": "http://www.opereto.com",
+    "web_url": "https://github.com/opereto/kubernetes",
+    "large_icon": "opereto_kubernetes_services.png"
+}

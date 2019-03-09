@@ -1,0 +1,8 @@
+{
+    "include": [
+          {
+              "path": "../kubernetes_api.py",
+              "type": "relative"
+          }
+      ]
+}
