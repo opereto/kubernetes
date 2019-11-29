@@ -50,6 +50,10 @@ class ServiceRunner(ServiceTemplate):
         validator = JsonSchemeValidator(self.input, input_scheme)
         validator.validate()
 
+        if self.input['pod_operation']=='delete_pod' and not self.input.get('pod_name'):
+            raise OperetoRuntimeError(
+                error='Pod name must be provided for this operation')
+
         if self.input['pod_name'].startswith('opereto-worker-node'):
             raise OperetoRuntimeError(error='Pod name is invalid, this name is used for Opereto standard elastic workers. Please select a different name.')
 
@@ -62,13 +66,8 @@ class ServiceRunner(ServiceTemplate):
     def process(self):
 
         def _modify_agent(agent_id):
-            try:
-                self.client.get_agent(agent_id)
-            except OperetoClientError:
-                self.client.create_agent(agent_id=agent_id, name=agent_id,
-                                         description='This agent worker is part of {} worker stateful set.'.format(
-                                             self.pod_name))
-                time.sleep(2)
+            self.client.create_agent(agent_id=agent_id, name=agent_id,description='This agent worker is part of {} worker stateful set.'.format(self.pod_name))
+            time.sleep(2)
             agent_properties = self.input['agent_properties']
             agent_properties.update({'opereto.shared': True, 'worker.label': self.pod_name})
             self.client.modify_agent_properties(agent_id, agent_properties)
@@ -86,15 +85,18 @@ class ServiceRunner(ServiceTemplate):
         def _tearrdown_pod():
             print 'Deleting worker pod..'
             self.pod_info = self.kubernetes_api.delete_pod(self.pod_name)
-            print 'Waiting that all worker pods will be offline (may take some time)..'
+            print 'Waiting that worker pod will be offline (may take some time)..'
             _agents_status(online=False)
+            print 'Agent {} is offline.'.format(self.pod_name)
+
 
         if self.pod_operation=='create_pod':
             print 'Creating worker pod..'
-            self.kubernetes_api.create_pod(self.pod_template)
             _modify_agent(self.pod_name)
-            print 'Waiting that all worker pods will be online (may take some time)..'
+            self.kubernetes_api.create_pod(self.pod_template)
+            print 'Waiting that worker pod will be online (may take some time)..'
             _agents_status(online=True)
+            print 'Agent {} is online.'.format(self.pod_name)
             self.pod_info = self.kubernetes_api.get_pod(self.pod_name)
             print self.pod_info.status
 

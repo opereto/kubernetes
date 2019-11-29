@@ -16,6 +16,9 @@ class ServiceRunner(ServiceTemplate):
 
     def validate_input(self):
 
+        self.pod_template = self.input['pod_template']
+        print 'Pod template:\n{}'.format(json.dumps(self.pod_template, indent=4))
+
         input_scheme = {
             "type": "object",
             "properties": {
@@ -66,8 +69,6 @@ class ServiceRunner(ServiceTemplate):
 
     def setup(self):
         self.kubernetes_api = KubernetesAPI()
-        self.pod_template = self.input['pod_template']
-        print 'Pod template:\n{}'.format(json.dumps(self.pod_template, indent=4))
 
     def teardown(self):
         pass
