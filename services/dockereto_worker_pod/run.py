@@ -1,17 +1,14 @@
+import json
+import time
 from opereto.helpers.services import ServiceTemplate
 from kubernetes_api import KubernetesAPI
-from opereto.utils.validations import JsonSchemeValidator, included_services_scheme, validate_dict, default_variable_pattern, default_variable_name_scheme, item_properties_scheme
+from opereto.utils.validations import JsonSchemeValidator, included_services_scheme, validate_dict, default_variable_pattern, default_variable_name_scheme
 from opereto.exceptions import OperetoRuntimeError
-import json
-
-from pyopereto.client import OperetoClient, OperetoClientError
-import time
-
+from pyopereto.client import OperetoClientError
 
 class ServiceRunner(ServiceTemplate):
 
     def __init__(self, **kwargs):
-        self.client = OperetoClient()
         ServiceTemplate.__init__(self, **kwargs)
 
     def validate_input(self):
@@ -39,7 +36,15 @@ class ServiceRunner(ServiceTemplate):
                     "type": "string",
                     "minLength": 1
                 },
-                "agent_properties": item_properties_scheme,
+                "agent_properties": {
+                    "type":["object", "null"],
+                    "patternProperties": {
+                        "^[a-z]{1}[a-zA-Z0-9-_\.]{2,126}$": {
+                            "type": ["object", "array", "string", "integer", "boolean","null"]
+                        }
+                    },
+                    "additionalProperties": False
+                },
                 "required": ['pod_operation', 'pod_template',
                              'agent_java_config', 'agent_log_level', 'worker_config',
                              'agent_properties'],

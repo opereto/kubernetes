@@ -1,6 +1,7 @@
-from kubernetes import client as kubernetes_client, config as kubernetes_config
 import time
-
+from kubernetes import client as kubernetes_client, config as kubernetes_config
+from opereto.utils.shell import run_shell_cmd
+from opereto.exceptions import OperetoRuntimeError
 
 class KubernetesAPI(object):
 
@@ -44,8 +45,8 @@ class KubernetesAPI(object):
         self.v1.create_namespaced_pod(body=pod_manifest, namespace=self.namespace)
         while True:
             resp = self.get_pod(pod_name)
-            print 'Pod status: {}'.format(resp.status.phase)
             if resp.status.phase != 'Pending':
+                print 'Pod status: {}'.format(resp.status.phase)
                 break
             time.sleep(2)
         return resp
@@ -55,8 +56,8 @@ class KubernetesAPI(object):
         time.sleep(5)
         while True:
             resp = self.get_pod(pod_name)
-            print 'Pod status: {}'.format(resp.status.phase)
             if resp.status.phase == 'Running':
+                print('Pod status: {}'.format(resp.status.phase))
                 break
             time.sleep(1)
         return resp
@@ -69,6 +70,37 @@ class KubernetesAPI(object):
         resp = self.v1.read_namespaced_pod(name=pod_name, namespace=self.namespace)
         return resp
 
-    def get_pod_log(self, pod_name, tail_lines=9900):
-        return self.v1.read_namespaced_pod_log(pod_name, self.namespace, follow=False, tail_lines=tail_lines, pretty='true')
+    def get_pod_log(self, pod_name, container=None, tail_lines=9900):
+            return self.v1.read_namespaced_pod_log(pod_name, self.namespace, container=container, follow=False, tail_lines=tail_lines, pretty='true')
+
+    def cp(self, pod_id, pod_path, current_path, direction='copy_from'):
+        if direction=='copy_from':
+            (exc, out,err) = run_shell_cmd('kubectl cp {}/{}:{} {}'.format(self.namespace, pod_id, pod_path, current_path))
+            return int(exc)
+        elif direction=='copy_to':
+            (exc, out, err) = run_shell_cmd('kubectl cp {} {}/{}:{}'.format(current_path, self.namespace, pod_id, pod_path))
+            return int(exc)
+        else:
+            raise OperetoRuntimeError(error='Invalid copy direction.')
+
+    def create_config_map(self, configmap_name, config_data={}):
+        try:
+            if config_data:
+                body = kubernetes_client.V1ConfigMap(data=config_data, metadata=kubernetes_client.V1ObjectMeta(name=configmap_name, namespace=self.namespace))
+                api_response = self.v1.create_namespaced_config_map(self.namespace, body=body, pretty=True)
+                return api_response
+        except Exception as e:
+            raise OperetoRuntimeError(error="Failed to create config map {}: {}".format(configmap_name, e))
+
+
+    def delete_config_map(self, configmap_name):
+        try:
+            api_response = self.v1.delete_namespaced_config_map(configmap_name, self.namespace, pretty=True, body=kubernetes_client.V1DeleteOptions())
+            return api_response
+        except Exception as e:
+            raise OperetoRuntimeError(error='Failed to delete config map {}: {}'.format(configmap_name, e))
+
+
+
+
 

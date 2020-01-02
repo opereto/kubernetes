@@ -16,10 +16,10 @@
                 "summary": "Manages docker+agent (e.g. dockereto) worker pods used by Opereto as operation tools and processing endpoints"
             }
         },
-        "run_command_pod": {
-            "source_dir": "run_command_pod",
+        "kubernetes_task_runner": {
+            "source_dir": "kubernetes_task_runner",
             "info": {
-                "summary": "Run command worker pods on-demand in Opereto elastic workers cluster"
+                "summary": "Run any custom task worker or test tool container as a pod on Opereto elastic workers k8s cluster"
             }
         }
     },
@@ -45,7 +45,7 @@
     "name": "Opereto Kubernetes Services",
     "summary": "Wrap automation and test tools as Kubernetes components and use them on-demand.",
     "description": "Kubernetes (k8s) is an open-source system for automating deployment, scaling, and management of containerized applications. Opereto kubernetes services allowing to setup, operate and teardown on-demand kubernetes-based worker pods and statefulsets. Workers can be packed as agent-embedded containers (dockereto) or as command containers executed by standard Opereto elastic workers.",
-    "version": "1.0.42",
+    "version": "1.0.45",
     "provider": "Opereto LTD",
     "category": "Test & Automation Tools",
     "provider_url": "http://www.opereto.com",
