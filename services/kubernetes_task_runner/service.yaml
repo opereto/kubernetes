@@ -1,0 +1,155 @@
+cmd:
+  type: python-venv
+  command:
+    default: python -u run.py
+  path:
+    default: ~/.opereto/operetovenv
+
+termination_cmd:
+  type: python-venv
+  command:
+    default: python -u kill.py
+  path:
+    default: ~/.opereto/operetovenv
+
+item_properties:
+
+-   key: pre_task_services
+    direction: input
+    editor: json
+    mandatory: false
+    type: json
+    value: []
+    help: One or more services to run (serially) before the task execution
+
+-   editor: json
+    key: pod_template
+    direction: input
+    mandatory: true
+    type: json
+    help: The worker pod template. Please note that pod name must be provided and must be unique.
+    value: {
+        "kind": "Pod",
+        "spec": {
+          "restartPolicy": "OnFailure",
+          "containers": [
+              {
+                "image": "debian",
+                "name": "command-demo",
+                "args": ["-c", "cat /home/tests/config/config.yaml"],
+                "command": [
+                  "/bin/sh"
+                ]
+              }
+          ]
+        },
+        "apiVersion": "v1",
+        "metadata": {
+          "labels": {
+            "purpose": "demonstrate-command"
+          },
+          "name": "command-demo"
+        }
+      }
+
+-   editor: json
+    key: pod_config_files
+    direction: input
+    mandatory: false
+    type: json
+    value: []
+    help: One or more configuration files to store on host (based on config map to volume mechanism). Must contain configmap name, file source path and file destimation path (optional)
+    example:
+      - name: my-config-file
+        src: /tmp/config
+        dest: /home/config
+
+-   key: valid_exit_codes
+    value:
+    type: text
+    direction: input
+    mandatory: false
+    help: Comma separated valid exit codes. e.g:1,5,8 for the execution of the testing tool. If not specified, 0 is the default.
+
+-   direction: input
+    editor: text
+    key: output_file_path
+    mandatory: false
+    type: text
+    value:
+    help: A path to json output file. If provided, the file content will be stored in the task_output property (optional).
+
+-   direction: input
+    editor: text
+    key: test_results_directory
+    mandatory: false
+    type: text
+    value:
+    help: The container directory to save the test results. This directory will be mounted by the runner service to local directory on the docker host that the test listener check periodically.
+
+-   key: test_parser_config
+    direction: input
+    editor: json
+    mandatory: false
+    type: json
+    value:
+    help: >
+      Test parser service configurations, passing needed input for the selected storage upload service.
+      The example below is for using Opereto's "opereto_pytest_results_parser" service (included in the Opereto PyTest Services package)
+      Example: {
+        "service": "opereto_pytest_results_parser",
+        "input": null,
+        "title": "Parse pytest results"
+      }
+
+-   direction: input
+    editor: number
+    key: keep_parser_running
+    mandatory: true
+    type: integer
+    value: 30
+    help: Keep the parser/listeners running after container stops (in seconds)
+
+-   key: post_task_services
+    direction: input
+    editor: json
+    mandatory: false
+    type: json
+    value: []
+    help: One or more services to run (serially) at the end of the task execution
+
+-   key: debug_mode
+    value: false
+    type: boolean
+    direction: input
+    mandatory: true
+    help: If checked, the runner runs in debug mode
+
+-   key: keep_pod_running
+    value: false
+    type: boolean
+    direction: input
+    mandatory: false
+    help: If checked, the worker pod will not be removed at the end and so the config map records
+
+## output properties
+-   direction: output
+    editor: hidden
+    example: 0
+    key: task_exitcode
+    mandatory: true
+    store: []
+    type: integer
+    value: 0
+
+-   direction: output
+    editor: hidden
+    example: 0
+    key: task_output
+    mandatory: true
+    store: []
+    type: integer
+    value: 0
+
+timeout: 1800
+type: action

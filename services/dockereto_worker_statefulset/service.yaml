@@ -37,7 +37,7 @@ item_properties:
       "apiVersion": "apps/v1",
       "kind": "StatefulSet",
       "metadata": {
-        "name": "<automatically assigned if not specified>"
+          "name": "<automatically assigned if not specified>"
       },
       "spec": {
         "replicas": 1,
