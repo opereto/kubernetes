@@ -16,6 +16,8 @@ class ServiceRunner(TaskRunner):
     def _validate_input(self):
 
         self.pod_template = self.input['pod_template']
+        self.output_file_path = self.input['output_file_path']
+
         input_scheme = {
             "type": "object",
             "properties": {
@@ -40,6 +42,9 @@ class ServiceRunner(TaskRunner):
                 "pod_template": {
                     "type": "object"
                 },
+                "output_file_path": {
+                    "type": ["string", "null"]
+                },
                 "required": ['pod_template'],
                 "additionalProperties": True
             }
@@ -59,8 +64,6 @@ class ServiceRunner(TaskRunner):
         self.task_exitcode = self._run_task()
         self._wait_listener()
         return self.task_exitcode
-
-
 
     def _run_task(self):
         SUCCESS=False
@@ -166,7 +169,7 @@ class ServiceRunner(TaskRunner):
             print(self.kubernetes_api.create_pod(self.pod_template))
             self._state['pod'][self.pod_name] = {}
             self._save_state(self._state)
-            self._run_parser(self.pod_name, '/var/opereto_listener_results')
+            self._run_parser(self.pod_name)
             runtime = my_timeout
             while runtime > 0:
                 resp = self.kubernetes_api.get_pod(self.pod_name)
@@ -210,11 +213,20 @@ class ServiceRunner(TaskRunner):
         self.pod_name = self.test_container_name+'-pod'
         self.pod_template['metadata']['name']=self.pod_name
         self.config_maps = {}
+        self.parser_results_directory = self.test_results_directory
+        self.listener_results_dir = '/var/opereto_listener_results'
+
 
     def _teardown(self):
         self.kubernetes_api = KubernetesAPI()
         current_state = self._get_state()
         if not self.input['keep_pod_running']:
+            if self.output_file_path:
+                try:
+                    self.kubernetes_api.cp(self.pod_name, self.output_file_path, self.task_output_json)
+                except Exception as e:
+                    print('Failed to process output data from output files {}: {}'.format(self.output_file_path, e))
+
             if current_state['pod']:
                 try:
                     pod_name = current_state['pod'].keys()[0]

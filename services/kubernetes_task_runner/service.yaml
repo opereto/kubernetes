@@ -64,20 +64,13 @@ item_properties:
         src: /tmp/config
         dest: /home/config
 
--   key: valid_exit_codes
-    value:
-    type: text
-    direction: input
-    mandatory: false
-    help: Comma separated valid exit codes. e.g:1,5,8 for the execution of the testing tool. If not specified, 0 is the default.
-
 -   direction: input
     editor: text
     key: output_file_path
     mandatory: false
     type: text
     value:
-    help: A path to json output file. If provided, the file content will be stored in the task_output property (optional).
+    help: A path to a JSON output file on the pod. If provided, the file content will be stored in the task_output property (optional).
 
 -   direction: input
     editor: text
@@ -107,7 +100,7 @@ item_properties:
     key: keep_parser_running
     mandatory: true
     type: integer
-    value: 30
+    value: 60
     help: Keep the parser/listeners running after container stops (in seconds)
 
 -   key: post_task_services
@@ -144,12 +137,11 @@ item_properties:
 
 -   direction: output
     editor: hidden
-    example: 0
     key: task_output
-    mandatory: true
-    store: []
-    type: integer
-    value: 0
+    mandatory: false
+    type: json
+    value: {}
+
 
 timeout: 1800
 type: action
