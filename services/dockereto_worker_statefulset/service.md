@@ -4,6 +4,6 @@ Manages docker+agent (e.g. dockereto) worker stateful sets used by Opereto as to
 Success if no exception is raised. Otherwise, Failure.
 
 #### Read the docs
-[Run custom workers as a stateful sets](https://docs.opereto.com/developing-with-opereto/opereto-workers/#run-as-a-stateful-set)
+[Opereto workers](https://docs.opereto.com/framework/opereto-workers/)
 
  
