@@ -45,7 +45,7 @@
     "name": "Opereto Kubernetes Services",
     "summary": "Wrap automation and test tools as Kubernetes components and use them on-demand.",
     "description": "Kubernetes (k8s) is an open-source system for automating deployment, scaling, and management of containerized applications. Opereto kubernetes services allowing to setup, operate and teardown on-demand kubernetes-based worker pods and statefulsets. Workers can be packed as agent-embedded containers (dockereto) or as command containers executed by standard Opereto elastic workers.",
-    "version": "1.0.49",
+    "version": "1.0.50",
     "provider": "Opereto LTD",
     "category": "Test & Automation Tools",
     "provider_url": "http://www.opereto.com",
