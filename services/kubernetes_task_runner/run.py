@@ -167,6 +167,7 @@ class ServiceRunner(TaskRunner):
         try:
             self._print_step_title('Running worker pod..')
             print(self.kubernetes_api.create_pod(self.pod_template))
+            self._is_agent_up_and_running(self.pod_name)
             self._state['pod'][self.pod_name] = {}
             self._save_state(self._state)
             self._run_parser(self.pod_name)

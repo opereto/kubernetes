@@ -36,10 +36,7 @@ item_properties:
               {
                 "image": "debian",
                 "name": "command-demo",
-                "args": ["-c", "cat /home/tests/config/config.yaml"],
-                "command": [
-                  "/bin/sh"
-                ]
+                "command": ["sh", "-c', 'echo Hello From Worker! && sleep 30"]
               }
           ]
         },
