@@ -67,7 +67,7 @@ class ServiceRunner(TaskRunner):
 
     def _run_task(self):
         SUCCESS=False
-        my_timeout = self.client.get_process_info()['timeout']-30
+        my_timeout = self.client.get_process_info()['timeout']-60
 
         if self.input['pod_config_files']:
             for config_file in self.input['pod_config_files']:
@@ -76,7 +76,7 @@ class ServiceRunner(TaskRunner):
                 configmap_data = config_file['data']
                 if validate_dict(config_file['data']):
                     configmap_data = yaml.safe_dump(config_file['data'])
-                print(self.kubernetes_api.create_config_map(configmap_name, {config_file['name']: configmap_data}))
+                print(self.kubernetes_api.create_config_map(configmap_name, config_data={config_file['name']: configmap_data}, labels={'opereto_pid': self.input['pid']}))
                 self._state['configmap'][configmap_name]={}
                 self._save_state(self._state)
                 self.config_maps[configmap_name]={
@@ -105,46 +105,46 @@ class ServiceRunner(TaskRunner):
                     )
 
         ## add opereto worker sidecar container
-        self.pod_template['spec']['containers'].append({
-            "image": "opereto/worker",
-            "name": self.test_container_name+"-opereto-worker",
-            "resources": {
-                "requests": {
-                    "memory": "2Gi"
-                },
-                "limits": {
-                    "memory": "2Gi"
-                }
-            },
-            "env": [
-                {
-                    "name": "opereto_host",
-                    "value": self.input['opereto_host']
-                },
-                {
-                    "name": "opereto_user",
-                    "value": self.input['opereto_user']
-                },
-                {
-                    "name": "opereto_password",
-                    "value": self.input['opereto_password']
-                },
-                {
-                    "name": "agent_name",
-                    "value": self.pod_name
-                },
-                {
-                    "name": "javaParams",
-                    "value": "-Xms500m -Xmx500m"
-                },
-                {
-                    "name": "log_level",
-                    "value": "info"
-                }
-            ]
-        })
-
         if self.input['test_parser_config']:
+            self.pod_template['spec']['containers'].append({
+                "image": "opereto/worker",
+                "name": self.test_container_name+"-opereto-worker",
+                "resources": {
+                    "requests": {
+                        "memory": "2Gi"
+                    },
+                    "limits": {
+                        "memory": "2Gi"
+                    }
+                },
+                "env": [
+                    {
+                        "name": "opereto_host",
+                        "value": self.input['opereto_host']
+                    },
+                    {
+                        "name": "opereto_user",
+                        "value": self.input['opereto_user']
+                    },
+                    {
+                        "name": "opereto_password",
+                        "value": self.input['opereto_password']
+                    },
+                    {
+                        "name": "agent_name",
+                        "value": self.pod_name
+                    },
+                    {
+                        "name": "javaParams",
+                        "value": "-Xms500m -Xmx500m"
+                    },
+                    {
+                        "name": "log_level",
+                        "value": "info"
+                    }
+                ]
+            })
+
             if not 'volumes' in self.pod_template['spec']:
                 self.pod_template['spec']['volumes'] = []
             self.pod_template['spec']['volumes'].append(
@@ -167,7 +167,8 @@ class ServiceRunner(TaskRunner):
         try:
             self._print_step_title('Running worker pod..')
             print(self.kubernetes_api.create_pod(self.pod_template))
-            self._is_agent_up_and_running(self.pod_name)
+            if self.input['test_parser_config']:
+                self._is_agent_up_and_running(self.pod_name)
             self._state['pod'][self.pod_name] = {}
             self._save_state(self._state)
             self._run_parser(self.pod_name)
@@ -190,9 +191,6 @@ class ServiceRunner(TaskRunner):
                         break
                 time.sleep(5)
                 runtime -= 5
-        except Exception,e:
-            print str(e)
-            return self.client.ERROR
         finally:
             try:
                 print(self.kubernetes_api.get_pod_log(self.pod_name, container=self.test_container_name))
@@ -213,6 +211,9 @@ class ServiceRunner(TaskRunner):
         self.test_container_name = self.pod_template['metadata']['name']
         self.pod_name = self.test_container_name+'-pod'
         self.pod_template['metadata']['name']=self.pod_name
+        if not self.pod_template['metadata'].get('labels'):
+            self.pod_template['metadata']['labels']={}
+        self.pod_template['metadata']['labels']['opereto_pid'] = self.input['pid']
         self.config_maps = {}
         self.parser_results_directory = self.test_results_directory
         self.listener_results_dir = '/var/opereto_listener_results'

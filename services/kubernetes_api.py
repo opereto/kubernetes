@@ -83,10 +83,10 @@ class KubernetesAPI(object):
         else:
             raise OperetoRuntimeError(error='Invalid copy direction.')
 
-    def create_config_map(self, configmap_name, config_data={}):
+    def create_config_map(self, configmap_name, config_data={}, labels={}):
         try:
             if config_data:
-                body = kubernetes_client.V1ConfigMap(data=config_data, metadata=kubernetes_client.V1ObjectMeta(name=configmap_name, namespace=self.namespace))
+                body = kubernetes_client.V1ConfigMap(data=config_data, metadata=kubernetes_client.V1ObjectMeta(name=configmap_name, namespace=self.namespace, labels=labels))
                 api_response = self.v1.create_namespaced_config_map(self.namespace, body=body, pretty=True)
                 return api_response
         except Exception as e:
