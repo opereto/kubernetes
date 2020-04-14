@@ -173,26 +173,31 @@ class ServiceRunner(TaskRunner):
             self._save_state(self._state)
             self._run_parser(self.pod_name)
             runtime = my_timeout
+            end_container_execution = False
             while runtime > 0:
                 resp = self.kubernetes_api.get_pod(self.pod_name)
                 if resp.status.phase != 'Running':
                     if resp.status.phase == 'Succeeded':
                         SUCCESS=True
-                    break
+                    end_container_execution = True
                 else:
-                    test_container_status=False
                     for container in resp.status.container_statuses:
                         if container.name==self.test_container_name and container.state.terminated is not None:
                             if container.state.terminated.reason=='Completed':
                                 SUCCESS = True
-                            test_container_status=True
+                            end_container_execution=True
                             break
-                    if test_container_status:
-                        break
-                time.sleep(5)
-                runtime -= 5
+
+                if end_container_execution:
+                    break
+                time.sleep(10)
+                runtime -= 10
         finally:
             try:
+                self._print_step_title('POD end of execution status:')
+                resp = self.kubernetes_api.get_pod(self.pod_name)
+                print(resp)
+                self._print_step_title('POD execution log:')
                 print(self.kubernetes_api.get_pod_log(self.pod_name, container=self.test_container_name))
                 time.sleep(5)
             except Exception as e:

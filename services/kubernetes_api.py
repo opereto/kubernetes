@@ -71,7 +71,7 @@ class KubernetesAPI(object):
         return resp
 
     def get_pod_log(self, pod_name, container=None, tail_lines=9900):
-            return self.v1.read_namespaced_pod_log(pod_name, self.namespace, container=container, follow=False, tail_lines=tail_lines, pretty='true')
+        return self.v1.read_namespaced_pod_log(pod_name, self.namespace, container=container, follow=False, tail_lines=tail_lines, pretty='true')
 
     def cp(self, pod_id, pod_path, current_path, direction='copy_from'):
         if direction=='copy_from':
