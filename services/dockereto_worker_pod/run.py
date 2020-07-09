@@ -155,20 +155,11 @@ class ServiceRunner(ServiceTemplate):
                     "value": self.input['opereto_host']
                 },
                 {
-                    "name": "opereto_user",
+                    "name": "opereto_token",
                     "valueFrom": {
                         "secretKeyRef": {
                             "name": self.input['worker_config'],
-                            "key": "OPERETO_USERNAME"
-                        }
-                    }
-                },
-                {
-                    "name": "opereto_password",
-                    "valueFrom": {
-                        "secretKeyRef": {
-                            "name": self.input['worker_config'],
-                            "key": "OPERETO_PASSWORD"
+                            "key": "OPERETO_TOKEN"
                         }
                     }
                 },

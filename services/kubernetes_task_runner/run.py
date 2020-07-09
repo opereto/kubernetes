@@ -123,12 +123,8 @@ class ServiceRunner(TaskRunner):
                         "value": self.input['opereto_host']
                     },
                     {
-                        "name": "opereto_user",
-                        "value": self.input['opereto_user']
-                    },
-                    {
-                        "name": "opereto_password",
-                        "value": self.input['opereto_password']
+                        "name": "opereto_token",
+                        "value": self.input['opereto_token']
                     },
                     {
                         "name": "agent_name",
