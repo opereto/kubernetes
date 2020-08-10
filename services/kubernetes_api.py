@@ -1,5 +1,5 @@
 import time
-from kubernetes import client as kubernetes_client, config as kubernetes_config
+from kubernetes import watch, client as kubernetes_client, config as kubernetes_config
 from opereto.utils.shell import run_shell_cmd
 from opereto.exceptions import OperetoRuntimeError
 
@@ -70,8 +70,10 @@ class KubernetesAPI(object):
         resp = self.v1.read_namespaced_pod(name=pod_name, namespace=self.namespace)
         return resp
 
-    def get_pod_log(self, pod_name, container=None, tail_lines=9900):
-        return self.v1.read_namespaced_pod_log(pod_name, self.namespace, container=container, follow=False, tail_lines=tail_lines, pretty='true')
+    def get_pod_log(self, pod_name):
+        w = watch.Watch()
+        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace):
+            print(e)
 
     def cp(self, pod_id, pod_path, current_path, direction='copy_from'):
         if direction=='copy_from':
