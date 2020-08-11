@@ -70,10 +70,14 @@ class KubernetesAPI(object):
         resp = self.v1.read_namespaced_pod(name=pod_name, namespace=self.namespace)
         return resp
 
-    def get_pod_log(self, pod_name):
+    def print_pod_log(self, pod_name):
         w = watch.Watch()
-        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace):
-            print(e)
+        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace, follow=True,
+                          tail_lines=1, _preload_content=False):
+            try:
+                print(e.encode('ascii', 'ignore'))
+            except:
+                pass
 
     def cp(self, pod_id, pod_path, current_path, direction='copy_from'):
         if direction=='copy_from':

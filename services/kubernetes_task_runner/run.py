@@ -159,7 +159,7 @@ class ServiceRunner(TaskRunner):
                     }
                 )
 
-        print 'Pod template:\n{}'.format(json.dumps(self.pod_template, indent=4))
+        print('Pod template:\n{}'.format(json.dumps(self.pod_template, indent=4)))
         try:
             self._print_step_title('Running worker pod..')
             print(self.kubernetes_api.create_pod(self.pod_template))
@@ -174,17 +174,20 @@ class ServiceRunner(TaskRunner):
                 resp = self.kubernetes_api.get_pod(self.pod_name)
                 if resp.status.phase != 'Running':
                     if resp.status.phase == 'Succeeded':
-                        SUCCESS=True
+                        SUCCESS = True
                     end_container_execution = True
                 else:
                     for container in resp.status.container_statuses:
-                        if container.name==self.test_container_name and container.state.terminated is not None:
-                            if container.state.terminated.reason=='Completed':
+                        self.kubernetes_api.print_pod_log(self.pod_name)
+                        if container.name == self.test_container_name and container.state.terminated is not None:
+                            if container.state.terminated.reason == 'Completed':
                                 SUCCESS = True
-                            end_container_execution=True
+                            end_container_execution = True
                             break
 
                 if end_container_execution:
+                    time.sleep(5)  ## get the last log lines
+                    self.kubernetes_api.print_pod_log(self.pod_name)
                     break
                 time.sleep(10)
                 runtime -= 10
@@ -193,9 +196,6 @@ class ServiceRunner(TaskRunner):
                 self._print_step_title('POD end of execution status:')
                 resp = self.kubernetes_api.get_pod(self.pod_name)
                 print(resp)
-                self._print_step_title('POD execution log:')
-                print(self.kubernetes_api.get_pod_log(self.pod_name, container=self.test_container_name))
-                time.sleep(5)
             except Exception as e:
                 print(str(e))
 
