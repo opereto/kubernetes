@@ -178,7 +178,7 @@ class ServiceRunner(TaskRunner):
                     end_container_execution = True
                 else:
                     for container in resp.status.container_statuses:
-                        self.kubernetes_api.print_pod_log(self.pod_name)
+                        self.kubernetes_api.print_pod_log(self.pod_name, container=self.test_container_name)
                         if container.name == self.test_container_name and container.state.terminated is not None:
                             if container.state.terminated.reason == 'Completed':
                                 SUCCESS = True
@@ -187,7 +187,7 @@ class ServiceRunner(TaskRunner):
 
                 if end_container_execution:
                     time.sleep(5)  ## get the last log lines
-                    self.kubernetes_api.print_pod_log(self.pod_name)
+                    self.kubernetes_api.print_pod_log(self.pod_name, container=self.test_container_name)
                     break
                 time.sleep(10)
                 runtime -= 10

@@ -70,9 +70,9 @@ class KubernetesAPI(object):
         resp = self.v1.read_namespaced_pod(name=pod_name, namespace=self.namespace)
         return resp
 
-    def print_pod_log(self, pod_name):
+    def print_pod_log(self, pod_name, container=None):
         w = watch.Watch()
-        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace, follow=True,
+        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace, container=container, follow=True,
                           tail_lines=1, _preload_content=False):
             try:
                 print(e.encode('ascii', 'ignore'))
