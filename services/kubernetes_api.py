@@ -72,12 +72,15 @@ class KubernetesAPI(object):
 
     def print_pod_log(self, pod_name, container=None):
         w = watch.Watch()
-        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace, container=container, follow=True,
-                          tail_lines=1, _preload_content=False):
+        for e in w.stream(self.v1.read_namespaced_pod_log, name=pod_name, namespace=self.namespace, container=container,
+                          follow=True,
+                          _preload_content=False):
             try:
+                print(str(e))
+            except UnicodeDecodeError:
                 print(e.encode('ascii', 'ignore'))
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
     def cp(self, pod_id, pod_path, current_path, direction='copy_from'):
         if direction=='copy_from':
